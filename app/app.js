@@ -44,13 +44,11 @@ angular.module("dekorateApp", ['nvd3', 'ngMaterial']).controller("expensesContro
         url: 'http://localhost:8080/expenses',
         method: 'GET',
     }).then(function (expenses) {
-        if(expenses.data.length != 0)
-        {
-            $scope.expensesTable =expenses.data;
+        if (expenses.data.length != 0) {
+            $scope.expensesTable = expenses.data;
             drawExpenseCharts();
         }
-        else
-        {
+        else {
             $scope.expensesTable = sampleData;
             drawExpenseCharts();
         }
@@ -73,10 +71,12 @@ angular.module("dekorateApp", ['nvd3', 'ngMaterial']).controller("expensesContro
             $http({
                 url: 'http://localhost:8080/expenses',
                 method: 'POST',
-                data:{'name': $scope.name,
+                data: {
+                    'name': $scope.name,
                     'type': $scope.type,
                     'price': $scope.price,
-                    'date': $scope.date}
+                    'date': $scope.date
+                }
             }).then(function (expenses) {
 
             }, function (err) {
@@ -93,10 +93,10 @@ angular.module("dekorateApp", ['nvd3', 'ngMaterial']).controller("expensesContro
             url: 'http://localhost:8080/expenses',
             method: 'DELETE',
             headers: {
-                Accept : "application/x-www-form-urlencoded; charset=utf-8",
+                Accept: "application/x-www-form-urlencoded; charset=utf-8",
                 "Content-Type": "application/json; charset=utf-8"
             },
-            data:{'id':$scope.expensesTable[index]._id}
+            data: {'id': $scope.expensesTable[index]._id}
         }).then(function (expenses) {
         }, function (err) {
             console.log(err);
@@ -197,22 +197,15 @@ angular.module("dekorateApp", ['nvd3', 'ngMaterial']).controller("expensesContro
             $scope.cummulativeCategoryData.push(element);
         }
     };
-    function generateData() {
+    //Data for bar chart
+    var barChartDataGenerator = function () {
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-        var nest = d3.nest()
+        //categorising the data for each month in a year(Month-year as key)
+        $scope.dateData = d3.nest()
             .key(function (d) {
                 return months[(new Date(d.date)).getUTCMonth()] + '-' + new Date(d.date).getUTCFullYear();
             }).entries($scope.expensesTable);
-        return nest;
-    };
-    //Data for bar chart
-    var barChartDataGenerator = function () {
-        $scope.dateData = generateData();
-        $scope.typeDate = d3.nest()
-            .key(function (d) {
-                return d.type;
-            })
-            .entries($scope.expensesTable);
+        //Converting the expenses table data to be based on expense type as keys and corresponding aggregated values to each month and year
         var finalData = [];
         var element = {};
         element.key = 'cash';
@@ -242,11 +235,11 @@ angular.module("dekorateApp", ['nvd3', 'ngMaterial']).controller("expensesContro
             element.price = credit;
             finalData[1].values.push(element);
         }
-        var nest = finalData;
         var k = 0;
         var type = ['cash', 'credit'];
+        //Converting the data fetched based on types to corresponding axis values
         $scope.barData = d3.range(2).map(function () {
-            var a = nest[k];
+            var a = finalData[k];
             k++;
             return a.values.map(stream_index);
         }).map(function (data, i) {
@@ -261,6 +254,7 @@ angular.module("dekorateApp", ['nvd3', 'ngMaterial']).controller("expensesContro
     function stream_index(d, i) {
         return {x: i, y: d.price};
     }
+
     // Common function to draw bar and pie charts
     function drawExpenseCharts() {
         $scope.expensesTable.sort(custom_sort);
