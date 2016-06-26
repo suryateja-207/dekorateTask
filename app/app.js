@@ -2,6 +2,9 @@
 
 // Declare app level module which depends on views, and components
 angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesController",function($scope) {
+    /*
+      stores corresponding data
+     */
     $scope.expensesTable = [
         { 'name':'Rent',
             'type': 'cash',
@@ -18,7 +21,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
             'price': '100',
             'date' : '2016-04-11'
             },
-        { 'name':'utilities',
+        { 'name':'Utilities',
             'type': 'cash',
             'price': '100',
             'date' : '2016-03-11'
@@ -114,7 +117,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
     function custom_sort(a, b) {
         return new Date(a.date).getTime() - new Date(b.date).getTime();
     }
-    function pieChartDataGenrator()
+    function pieChartDataGenerator()
     {
         var categoryData =d3.nest()
             .key(function (d) {
@@ -203,7 +206,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
         return {x: i, y: d.price};
     }
     $scope.expensesTable.sort(custom_sort);
-    pieChartDataGenrator();
+    pieChartDataGenerator();
     barChartDataGenerator();
 });
 
