@@ -2,6 +2,9 @@
 
 // Declare app level module which depends on views, and components
 angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesController",function($scope) {
+    /*
+      stores corresponding data
+     */
     $scope.expensesTable = [
         { 'name':'Rent',
             'type': 'cash',
@@ -18,7 +21,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
             'price': '100',
             'date' : '2016-04-11'
             },
-        { 'name':'utilities',
+        { 'name':'Utilities',
             'type': 'cash',
             'price': '100',
             'date' : '2016-03-11'
