@@ -30,7 +30,7 @@
 <div class="top-header">
     <img class="header-img" src="http://www.dekorate.in/fc0c3bc39ce00558b43e7896e4f0198d.png" alt="dekorate">
 </div>
-<div layout="row" layout-sm="column" class="body-background">
+<div layout="row" layout-sm="column">
     <div flex="20"></div>
     <div flex="30">
         <h2>Expenses Table</h2>
@@ -67,7 +67,7 @@
         <h2>Add a row</h2>
         <form name = "expense-form" class="form-horizontal border-form" role="form" ng-submit="addRow()">
                 <div layout="column">
-                    <div flex>
+                    <div flex="20">
                     <b>Name :</b>
                 <md-input-container>
                     <input ng-model="name" required="true" type="string">
@@ -84,7 +84,6 @@
                             Credit
                         </label>
                     </div>
-
                     <div flex>
                 <b>Price :</b>
                 <md-input-container>
@@ -107,10 +106,10 @@
     </div>
 </div>
 <hr>
-<div id="pie_chart">
-    <nvd3 options="barOptions" data = "bardata" config="{refreshDataOnly: true}"></nvd3>
-    <hr>
-    <nvd3 options="options" data="expensesTable" config="{refreshDataOnly: true}"></nvd3>
+<div id="charts" layout="row">
+    <nvd3 flex="40" options="barChartOptions" data = "barData" config="{refreshDataOnly: true}"></nvd3>
+    <div flex="10"></div>
+    <nvd3 flex="40" options="pieChartOptions" data="cummulativeCategoryData" config="{refreshDataOnly: true}"></nvd3>
 </div>
 
 
