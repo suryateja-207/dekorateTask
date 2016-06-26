@@ -24,8 +24,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
             'date' : '2016-03-11'
         }
     ];
-    console.log($scope.expensesTable);
-    // $scope.expensesTable = [];
+
     $scope.addRow = function(){
         if ($scope.name != null && $scope.type != null && $scope.price != null && $scope.date != null) {
             $scope.expensesTable.push({
@@ -34,25 +33,24 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
                 'price': $scope.price,
                 'date': $scope.date
             });
-            var frm = document.getElementsByName('expense-form')[0];
-            // Submit
-            frm.reset();  // Reset
+            var form = document.getElementsByName('expense-form')[0];
+            form.reset();  // Reset
         }
-        console.log($scope.expensesTable);
         $scope.expensesTable.sort(custom_sort);
-        s();
+        barChartDataGenerator();
+        pieChartDataGenerator();
     };
     $scope.removeRow = function(index){
         $scope.expensesTable.splice( index, 1 );
     };
-    $scope.options = {
+    $scope.pieChartOptions = {
         "chart": {
             "type": "pieChart",
             "height": 500,
             "showLabels": true,
             "duration": 500,
             x: function(d){return d.name;},
-            y: function(d){return d.price;},
+            y: function(d){return d.amount;},
             "labelThreshold": 0.01,
             "labelSunbeamLayout": true,
             "legend": {
@@ -62,11 +60,19 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
                     "bottom": 5,
                     "left": 0
                 }
+            },
+            labelType:'percent',
+            valueFormat:function (d) {
+                return d3.format(',.5f')(d);
             }
+        },
+        title:{
+            enable:true,
+            text:'Expense Summary'
         }
     };
 
-    $scope.barOptions = {
+    $scope.barChartOptions = {
         chart: {
             type: 'multiBarChart',
             height: 450,
@@ -79,15 +85,12 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
             clipEdge: true,
             //staggerLabels: true,
             duration: 500,
-            stacked: true,
+            grouped :true,
             xAxis: {
                 axisLabel: 'Month-Year',
                 showMaxMin: false,
                 tickFormat: function(d){
-                    console.log(d, "vinodh");
-                    console.log($scope.dateData[d].key,"sury");
                     return $scope.dateData[d].key;
-                    //return d3.format(',f')(d);
                 }
             },
             yAxis: {
@@ -97,45 +100,50 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
                     return d3.format(',.1f')(d);
                 }
             }
+        },
+        title:{
+            enable:true,
+            text:'Expenses by Month'
         }
     };
-    $scope.axisValue = '';
-    // $scope.nest = d3.nest()
-    //     .key(function (d) {
-    //         return d.type;
-    //     })
-    //     .entries($scope.expensesTable);
-    console.log($scope.nest);
-    //console.log(nest.map(stream_index));
-    // $scope.bardata = $scope.nest.map(stream_index).map(function(data, i) {
-    //     return {
-    //         key: 'Stream' + i,
-    //         values: data
-    //     };});
-    //console.log(finalData, "finalData");
     function custom_sort(a, b) {
         return new Date(a.date).getTime() - new Date(b.date).getTime();
     }
-
-    $scope.expensesTable.sort(custom_sort);
-    var s = function () {
+    function pieChartDataGenrator()
+    {
+        var categoryData =d3.nest()
+            .key(function (d) {
+                return d.name;
+            }).entries($scope.expensesTable);
+        $scope.cummulativeCategoryData  = [];
+        for(var i = 0;i < categoryData.length; i++)
+        {
+            var amount = 0;
+            for(var j = 0 ;j < categoryData[i].values.length;j++)
+            {
+                amount += parseInt(categoryData[i].values[j].price);
+            }
+            var element = {};
+            element.name = categoryData[i].key;
+            element.amount = amount;
+            $scope.cummulativeCategoryData.push(element);
+        }
+    };
+    function generateData() {
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-
-        function generateData() {
-            var nest = d3.nest()
-                .key(function (d) {
-                    return months[(new Date(d.date)).getUTCMonth()] + '-' + new Date(d.date).getUTCFullYear();
-                }).entries($scope.expensesTable);
-            return nest;
-        };
+        var nest = d3.nest()
+            .key(function (d) {
+                return months[(new Date(d.date)).getUTCMonth()] + '-' + new Date(d.date).getUTCFullYear();
+            }).entries($scope.expensesTable);
+        return nest;
+    };
+    var barChartDataGenerator = function () {
         $scope.dateData = generateData();
-        console.log($scope.dateData ,"datedata");
         $scope.typeDate = d3.nest()
             .key(function (d) {
                 return d.type;
             })
             .entries($scope.expensesTable);
-        console.log($scope.typeDate);
         var finalData = [];
         var element = {};
         element.key = 'cash';
@@ -171,10 +179,9 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
             finalData[1].values.push(element);
         }
         var nest = finalData;
-        console.log(nest, "sdds");
         var k = 0;
         var type = ['cash','credit'];
-        $scope.bardata = d3.range(2).map(function () {
+        $scope.barData = d3.range(2).map(function () {
             var a = nest[k];
             console.log(nest[k]);
             k++;
@@ -185,43 +192,13 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
                 values: data
             };
         });
-        console.log($scope.bardata);
     };
-    // $scope.sdata = generateData();
-    // /* Random Data Generator (took from nvd3.org) */
-    // function generateData() {
-    //     return stream_layers(3,50+Math.random()*50,.1).map(function(data, i) {
-    //         return {
-    //             key: 'Stream' + i,
-    //             values: data
-    //         };
-    //     });
-    // }
-    // /* Inspired by Lee Byron's test data generator. */
-    // function stream_layers(n, m, o) {
-    //     if (arguments.length < 3) o = 0;
-    //     function bump(a) {
-    //         var x = 1 / (.1 + Math.random()),
-    //             y = 2 * Math.random() - .5,
-    //             z = 10 / (.1 + Math.random());
-    //         for (var i = 0; i < m; i++) {
-    //             var w = (i / m - y) * z;
-    //             a[i] += x * Math.exp(-w * w);
-    //         }
-    //     }
-    //     return d3.range(n).map(function() {
-    //         var a = [], i;
-    //         for (i = 0; i < m; i++) a[i] = o + o * Math.random();
-    //         for (i = 0; i < 5; i++) bump(a);
-    //         return a.map(stream_index);
-    //     });
-    // }
     function stream_index(d, i) {
 
         return {x: i, y: d.price};
     }
-    s();
-
-    //console.log($scope.sdata);
+    $scope.expensesTable.sort(custom_sort);
+    pieChartDataGenrator();
+    barChartDataGenerator();
 });
 
