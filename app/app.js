@@ -117,7 +117,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
     function custom_sort(a, b) {
         return new Date(a.date).getTime() - new Date(b.date).getTime();
     }
-    function pieChartDataGenrator()
+    function pieChartDataGenerator()
     {
         var categoryData =d3.nest()
             .key(function (d) {
@@ -206,7 +206,7 @@ angular.module("dekorateApp", ['nvd3','ngMaterial']).controller("expensesControl
         return {x: i, y: d.price};
     }
     $scope.expensesTable.sort(custom_sort);
-    pieChartDataGenrator();
+    pieChartDataGenerator();
     barChartDataGenerator();
 });
 
